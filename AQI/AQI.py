@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd 
 import matplotlib.pyplot as plt 
 import seaborn as sns
+from scipy import stats 
 
 sns.set(style="darkgrid", font="SimHei", rc={"axes.unicode_minus": False})
 
@@ -34,10 +35,16 @@ pd.set_option("max_columns", 20)
 # sns.scatterplot(x="Longitude", y="Latitude", hue="AQI", palette=plt.cm.RdYlGn_r, data=data)
 # plt.show()
 
-all = np.random.normal(loc=30, scale=50, size=10000)
-mean_arr = np.zeros(2000)
-for i in range(len(mean_arr)):
-    mean_arr[i] = np.random.choice(all, size=50, replace=False).mean()
-print(mean_arr.mean())
-sns.kdeplot(mean_arr, shade=True)
-plt.show()
+# all = np.random.normal(loc=30, scale=50, size=10000)
+# mean_arr = np.zeros(2000)
+# for i in range(len(mean_arr)):
+#     mean_arr[i] = np.random.choice(all, size=50, replace=False).mean()
+# print(mean_arr.mean())
+# sns.kdeplot(mean_arr, shade=True)
+# plt.show()
+
+stats.ttest_1samp(data["AQI"], 71)
+
+mean = data["AQI"].mean()
+std = data["AQI"].std()
+print(mean - 1.96 * (std / np.sqrt(len(data))), mean + 1.96 * (std / np.sqrt(len(data))))
