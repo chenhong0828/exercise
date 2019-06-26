@@ -3,6 +3,8 @@ import pandas as pd
 import matplotlib.pyplot as plt 
 import seaborn as sns
 from scipy import stats 
+from sklearn.linear_model import LinearRegression
+from sklearn.model_selection import train_test_split
 
 sns.set(style="darkgrid", font="SimHei", rc={"axes.unicode_minus": False})
 
@@ -43,8 +45,25 @@ pd.set_option("max_columns", 20)
 # sns.kdeplot(mean_arr, shade=True)
 # plt.show()
 
-stats.ttest_1samp(data["AQI"], 71)
+# print(stats.ttest_1samp(data["AQI"], 71))
 
-mean = data["AQI"].mean()
-std = data["AQI"].std()
-print(mean - 1.96 * (std / np.sqrt(len(data))), mean + 1.96 * (std / np.sqrt(len(data))))
+# mean = data["AQI"].mean()
+# std = data["AQI"].std()
+# print(mean - 1.96 * (std / np.sqrt(len(data))), mean + 1.96 * (std / np.sqrt(len(data))))
+
+X = data.drop(['City', 'AQI'], axis=1)
+y = data['AQI']
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25, random_state=0)
+lr = LinearRegression()
+lr.fit(X_train, y_train)
+y_hat = lr.predict(X_test)
+
+print(lr.score(X_train, y_train))
+print(lr.score(X_test, y_test))
+
+plt.figure(figsize=(15, 5))
+plt.plot(y_test.values, "-r", label="真实值")
+plt.plot(y_hat, "-g", label="预测值")
+plt.legend()
+plt.title("线性回归预测结果")
+plt.show()
