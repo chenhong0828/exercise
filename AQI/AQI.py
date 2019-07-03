@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from scipy import stats 
 from sklearn.linear_model import LinearRegression
+from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import train_test_split
 
 sns.set(style="darkgrid", font="SimHei", rc={"axes.unicode_minus": False})
@@ -51,19 +52,51 @@ pd.set_option("max_columns", 20)
 # std = data["AQI"].std()
 # print(mean - 1.96 * (std / np.sqrt(len(data))), mean + 1.96 * (std / np.sqrt(len(data))))
 
-X = data.drop(['City', 'AQI'], axis=1)
-y = data['AQI']
+# X = data.drop(['City', 'AQI'], axis=1)
+# y = data['AQI']
+# X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25, random_state=0)
+# lr = LinearRegression()
+# lr.fit(X_train, y_train)
+# y_hat = lr.predict(X_test)
+
+# print(lr.score(X_train, y_train))
+# print(lr.score(X_test, y_test))
+
+# plt.figure(figsize=(15, 5))
+# plt.plot(y_test.values, "-r", label="真实值")
+# plt.plot(y_hat, "-g", label="预测值")
+# plt.legend()
+# plt.title("线性回归预测结果")
+# plt.show()
+
+X = data.drop(['City', 'Coastal'], axis=1)
+y = data['Coastal']
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25, random_state=0)
-lr = LinearRegression()
+lr = LogisticRegression(C=0.0001)
 lr.fit(X_train, y_train)
 y_hat = lr.predict(X_test)
+# print(lr.score(X_train, y_train))
+# print(lr.score(X_test, y_test))
 
-print(lr.score(X_train, y_train))
-print(lr.score(X_test, y_test))
+# plt.figure(figsize=(15, 5))
+# plt.plot(y_test.values, marker="o",c="r", ms=8, ls="",label="真实值")
+# plt.plot(y_hat, marker="x", c="g", ms=8, ls="", label="预测值")
+# plt.legend()
+# plt.title("逻辑回归预测结果")
+# plt.show()
 
+probability = lr.predict_proba(X_test)
+print(probability[:10])
+print(np.argmax(probability, axis=1))
+index = np.arange(len(X_test))
+pro_0 = probability[:, 0]
+pro_1 = probability[:, 1]
+tick_label = np.where(y_test == y_hat, "O", "X")
 plt.figure(figsize=(15, 5))
-plt.plot(y_test.values, "-r", label="真实值")
-plt.plot(y_hat, "-g", label="预测值")
-plt.legend()
-plt.title("线性回归预测结果")
+plt.bar(index, height=pro_0, color="g", label="类别0概率值")
+plt.bar(index, height=pro_1, color="r", bottom=pro_0, label="类别1概率值", tick_label=tick_label)
+plt.legend(loc="best", bbox_to_anchor=(1, 1))
+plt.xlabel("样本序号")
+plt.ylabel("各个类别的概率")
+plt.title("逻辑回归分类概率")
 plt.show()
