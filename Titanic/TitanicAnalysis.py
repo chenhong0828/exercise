@@ -163,10 +163,10 @@ df.drop(['Pclass', 'Cabin', 'Name', 'Sex', 'Ticket', 'Embarked'], axis=1, inplac
 
 from sklearn import preprocessing
 scaler = preprocessing.StandardScaler()
-age_scale_param = scaler.fit(df[['Age']])
-df['Age_scaled'] = scaler.fit_transform(df[['Age']], age_scale_param)
-fare_scale_param = scaler.fit(df[['Fare']])
-df['Fare_scaled'] = scaler.fit_transform(df[['Fare']], fare_scale_param)
+# age_scale_param = scaler.fit(df[['Age']])
+df['Age_scaled'] = scaler.fit_transform(df[['Age']])
+# fare_scale_param = scaler.fit(df[['Fare']])
+df['Fare_scaled'] = scaler.fit_transform(df[['Fare']])
 # print(df.head())
 
 from sklearn import linear_model
@@ -180,3 +180,54 @@ X = train_np[:, 1:]
 clf = linear_model.LogisticRegression(C=1.0, penalty='l1', tol=1e-6)
 clf.fit(X, y)
 
+# print(clf)
+
+data_test = pd.read_csv('E:/dataAnalysis/Titanic/test.csv')
+# print(data_test.isnull().sum())
+# print(data_test.shape)
+data_test.loc[(data_test.Fare.isnull()), 'Fare'] = 0
+tem_df = data_test[['Age', 'Fare', 'Parch', 'SibSp', 'Pclass']]
+null_age = tem_df[data_test.Age.isnull()].values
+X = null_age[:, 1:]
+predictedAges = rfr.predict(X)
+data_test.loc[(data_test.Age.isnull(), 'Age')] = predictedAges
+
+data_test = set_Cabin_type(data_test)
+dummies_Cabin = pd.get_dummies(data_test['Cabin'], prefix='Cabin')
+dummies_Embarked = pd.get_dummies(data_test['Embarked'], prefix='Embarked')
+dummies_Sex = pd.get_dummies(data_test['Sex'], prefix='Sex')
+dummies_Pclass = pd.get_dummies(data_test['Pclass'], prefix='Pclass')
+
+df_test = pd.concat([data_test, dummies_Cabin, dummies_Embarked, dummies_Sex, dummies_Pclass], axis=1)
+df_test.drop(['Pclass', 'Cabin', 'Name', 'Sex', 'Ticket', 'Embarked'], axis=1, inplace=True)
+df_test['Age_scaled'] = scaler.fit_transform(df_test[['Age']])
+df_test['Fare_scaled'] = scaler.fit_transform(df_test[['Fare']])
+
+test = df_test.filter(regex='Survived|Age_.*|SibSp|Parch|Fare_.*|Cabin_.*|Embarked_.*|Sex_.*|Pclass_.*')
+predictions = clf.predict(test)
+# print(type(predictions[0]))
+# print(type(data_test['PassengerId'].values))
+# result = pd.DataFrame({'PassengerId': data_test['PassengerId'].values, 'Survived':predictions.astype(np.int32)})
+# result.to_csv("E:/dataAnalysis/Titanic/logistic_regression_predictions.csv", index=False)
+
+# print(pd.DataFrame({'columns': list(train_df.columns)[1:], 'coef': list(clf.coef_.T)}))
+
+from sklearn.model_selection import train_test_split
+from sklearn import cross_validation
+from sklearn.learning_curve import learning_curve 
+
+clf = linear_model.LogisticRegression(C=1.0, penalty='l1', tol=1e-6)
+all_data = df.filter(regex='Survived|Age_.*|SibSp|Prach|Fare_.*|Cabin_.*|Embarked_.*|Sex_.*|Pclass_.*')
+X = all_data.values[:, 1:]
+y = all_data.values[:, 0]
+print(cross_validation.cross_val_score(clf, X, y, cv=5))
+
+# split_train, split_cv = train_test_split(df, test_size=0.3, random_state=0)
+# train_df = split_train.filter(regex='Survived|Age_.*|SibSp|Prach|Fare_.*|Cabin_.*|Embarked_.*|Sex_.*|Pclass_.*')
+# clf = linear_model.LogisticRegression(C=1.0, penalty='l1', tol=1e-6)
+# clf.fit(train_df.values[:, 1:], train_df.values[:, 0])
+# cv_df = split_cv.filter(regex='Survived|Age_.*|SibSp|Prach|Fare_.*|Cabin_.*|Embarked_.*|Sex_.*|Pclass_.*')
+# predictions = clf.predict(cv_df.values[:, 1:])
+# origin_data_train = pd.read_csv('E:/dataAnalysis/Titanic/train.csv', engine="python")
+# bad_cases = origin_data_train.loc[origin_data_train['PassengerId'].isin(split_cv[predictions != cv_df.values[:, 0]]['PassengerId'].values)]
+# print(bad_cases)
