@@ -171,14 +171,14 @@ df['Fare_scaled'] = scaler.fit_transform(df[['Fare']])
 
 from sklearn import linear_model
 
-train_df = df.filter(regex='Survived|Age_.*|SibSp|Parch|Fare_.*|Cabin_.*|Embarked_.*|Sex_.*|Pclass_.*')
-train_np = train_df.values
+# train_df = df.filter(regex='Survived|Age_.*|SibSp|Parch|Fare_.*|Cabin_.*|Embarked_.*|Sex_.*|Pclass_.*')
+# train_np = train_df.values
 
-y = train_np[:, 0]
-X = train_np[:, 1:]
+# y = train_np[:, 0]
+# X = train_np[:, 1:]
 
-clf = linear_model.LogisticRegression(C=1.0, penalty='l1', tol=1e-6)
-clf.fit(X, y)
+# clf = linear_model.LogisticRegression(C=1.0, penalty='l1', tol=1e-6)
+# clf.fit(X, y)
 
 # print(clf)
 
@@ -203,8 +203,8 @@ df_test.drop(['Pclass', 'Cabin', 'Name', 'Sex', 'Ticket', 'Embarked'], axis=1, i
 df_test['Age_scaled'] = scaler.fit_transform(df_test[['Age']])
 df_test['Fare_scaled'] = scaler.fit_transform(df_test[['Fare']])
 
-test = df_test.filter(regex='Survived|Age_.*|SibSp|Parch|Fare_.*|Cabin_.*|Embarked_.*|Sex_.*|Pclass_.*')
-predictions = clf.predict(test)
+# test = df_test.filter(regex='Survived|Age_.*|SibSp|Parch|Fare_.*|Cabin_.*|Embarked_.*|Sex_.*|Pclass_.*')
+# predictions = clf.predict(test)
 # print(type(predictions[0]))
 # print(type(data_test['PassengerId'].values))
 # result = pd.DataFrame({'PassengerId': data_test['PassengerId'].values, 'Survived':predictions.astype(np.int32)})
@@ -279,5 +279,9 @@ X = train_np[:, 1:]
 
 clf = linear_model.LogisticRegression(C=1.0, penalty='l1', tol=1e-6)
 bagging_clf = BaggingRegressor(clf, n_estimators=20, max_samples=0.8, max_features=1.0, bootstrap=True, bootstrap_features=False, n_jobs=-1)
+bagging_clf.fit(X, y)
 
-clf.fit(X, y)
+test = df_test.filter(regex='Survived|Age_.*|SibSp|Parch|Fare_.*|Cabin_.*|Embarked_.*|Sex_.*|Pclass_.*')
+predictions = bagging_clf.predict(test)
+result = pd.DataFrame({'PassengerId': data_test['PassengerId'].values, 'Survived': predictions.astype(np.int32)})
+result.to_csv('E:/dataAnalysis/Titanic/logistic_regression_bagging_predictions.csv', index=False)
