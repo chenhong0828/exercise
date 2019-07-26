@@ -9,6 +9,7 @@ pd.set_option('max_columns', 100)
 # print(train_data.shape)
 # print(test_data.shape)
 
+# 探索各数值型变量与因变量的关系
 # fig =plt.scatter(train_data['GrLivArea'], train_data.SalePrice)
 # plt.xlabel('GrLivArea')
 # plt.ylabel('SalePrice')
@@ -16,29 +17,51 @@ pd.set_option('max_columns', 100)
 # plt.savefig('./GrLivArea_SalePrice.png')
 # print(train_data[train_data.BsmtFinSF1 == 5644])
 
-plt.figure(figsize=(20,10))
-plt.subplots_adjust(wspace=0.2, hspace=0, top=0.3, bottom=0.2)
-sns.set(font_scale=1.1)
-plt.subplot(231)
-sns.scatterplot(train_data['LotArea'], train_data.SalePrice)
-plt.subplot(232)
-sns.scatterplot(train_data['BsmtFinSF1'], train_data.SalePrice)
-plt.subplot(233)
-sns.scatterplot(train_data['TotalBsmtSF'], train_data.SalePrice)
-plt.subplot(234)
-sns.scatterplot(train_data['1stFlrSF'], train_data.SalePrice)
-plt.subplot(235)
-sns.scatterplot(train_data['GrLivArea'], train_data.SalePrice)
-plt.savefig('./OutlierAnalysis.png', dpi=600)
+# 对关系明显的全部绘制出散点图
+# plt.figure(figsize=(20,10))
+# plt.subplots_adjust(wspace=0.2, hspace=0.2)
+# sns.set(font_scale=1.1)
+# plt.subplot(231)
+# sns.scatterplot(train_data['LotArea'], train_data.SalePrice)
+# plt.subplot(232)
+# sns.scatterplot(train_data['BsmtFinSF1'], train_data.SalePrice)
+# plt.subplot(233)
+# sns.scatterplot(train_data['TotalBsmtSF'], train_data.SalePrice)
+# plt.subplot(234)
+# sns.scatterplot(train_data['1stFlrSF'], train_data.SalePrice)
+# plt.subplot(235)
+# sns.scatterplot(train_data['GrLivArea'], train_data.SalePrice)
+# plt.savefig('./OutlierAnalysis.png', dpi=600, bbox_inches='tight')
 
-# plt.show()
+# 剔除异常值
+train_data.drop(train_data[(train_data['GrLivArea'] > 4000) & (train_data['SalePrice'] < 200000)].index, inplace=True)
 
-# full_data = pd.concat([train_data, test_data], ignore_index=True)
-# print(full_data.shape)
+# 剔除异常值后再绘制散点图
+# plt.figure(figsize=(20,10))
+# plt.subplots_adjust(wspace=0.2, hspace=0.2)
+# sns.set(font_scale=1.1)
+# plt.subplot(231)
+# sns.scatterplot(train_data['LotArea'], train_data.SalePrice)
+# plt.subplot(232)
+# sns.scatterplot(train_data['BsmtFinSF1'], train_data.SalePrice)
+# plt.subplot(233)
+# sns.scatterplot(train_data['TotalBsmtSF'], train_data.SalePrice)
+# plt.subplot(234)
+# sns.scatterplot(train_data['1stFlrSF'], train_data.SalePrice)
+# plt.subplot(235)
+# sns.scatterplot(train_data['GrLivArea'], train_data.SalePrice)
+# plt.savefig('./OutlierAnalysis_new.png', dpi=600, bbox_inches='tight')
 
-
-
-# temp = full_data.isnull().sum()
+# 填充训练集中的缺失值
+# temp = train_data.isnull().sum()
 # print(temp[temp>0].sort_values(ascending=False))
+cols = ['PoolQC', 'MiscFeature', 'Alley', 'Fence', 'FireplaceQu', 'GarageYrBlt', 'GarageType', 'GarageFinish', 'GarageQual', 'GarageCond',
+    'BsmtFinType2', 'BsmtExposure', 'BsmtFinType1', 'BsmtCond', 'BsmtQual', 'MasVnrType']
+for col in cols:
+    train_data[col].fillna('None', inplace=True)
+train_data['MasVnrArea'].fillna(0, inplace=True)
+train_data['Electrical'].fillna(train_data.Electrical.mode()[0], inplace=True)
+# 填充LotFrontage，划分LotArea，用中值填充
 
-# print(full_data.describe())
+temp = train_data.isnull().sum()
+print(temp[temp>0].sort_values(ascending=False))
