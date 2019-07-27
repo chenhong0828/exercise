@@ -63,5 +63,17 @@ train_data['MasVnrArea'].fillna(0, inplace=True)
 train_data['Electrical'].fillna(train_data.Electrical.mode()[0], inplace=True)
 # 填充LotFrontage，划分LotArea，用中值填充
 
-temp = train_data.isnull().sum()
-print(temp[temp>0].sort_values(ascending=False))
+def set_missing_LotFrontage(df):
+    df['LotAreaCut'] = pd.qcut(df['LotArea'], 10)
+    df['LotFrontage'] = df.groupby(['LotAreaCut'])['LotFrontage'].transform(lambda x: x.fillna(x.median()))
+    return df
+
+set_missing_LotFrontage(train_data)
+# print(train_data.isnull().sum().sort_values(ascending=False))
+
+NumStr = ['MSSubClass', 'OverallQual', 'OverallCond', 'YearBuilt', 'YearRemodAdd', 'BsmtFullBath', 'BsmtHalfBath', 'FullBath', 'HalfBath', 'BedroomAbvGr', 'KitchenAbvGr', 
+        'GarageYrBlt', 'MoSold', 'YrSold']
+train_data.MSSubClass.astype(str)
+tem = train_data.groupby(['MSSubClass'])[['SalePrice']].agg(['mean', 'median', 'count']).sort_values(by=[('SalePrice', 'mean'), ('SalePrice', 'median')])
+
+print(tem)
